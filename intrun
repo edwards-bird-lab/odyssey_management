@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# script to start up an interactive session for computing
+
+# $1 = threads to use
+# $2 = memory to use
+# $3 = time needed for interactive session
+# $4 = partition to run the session on
+
+srun --pty -p ${4} -n ${1} -t ${3} --mem ${2} /bin/bash

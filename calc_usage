@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# script to quantify the amount of data usage that counts against Edwards lab quota
+# should be run in a location with a list of directories (e.g., user directories)
+# output is the total size of each directory in human readable format (analogous to du -sh)
+
+for dir in `ls -d */`
+do
+    find ${dir} -type f -group edwards_lab -print0 | du -ch --files0-from=- | \
+    tail -n 1 | cut -f 1 | awk -v dir="${dir}" -v OFS="\t" '{ print dir, $1 }'
+done

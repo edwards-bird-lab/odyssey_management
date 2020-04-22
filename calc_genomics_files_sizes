@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# script to scan for unzipped common genomics formats and quantify their storage impact
+# should be run in a location with a list of directories (e.g., user directories)
+# output is the number of files and the total size of files in GB provided per directory and per file type
+
+ftypes=".fasta .fa .fna .faa .fastq .fq .sam .vcf .bed .gff .gff3 .txt .out .err"
+
+for dir in `ls -d */`
+do
+    echo "$dir"
+    for ft in $ftypes
+    do
+        echo -ne "$ft\t"
+        find $dir -name "*${ft}" -group edwards_lab -exec ls -l {} \; | \
+        awk -v OFS="\t" '{total += $5} END { print NR, sprintf("%.2f", total / (1*1024*1024*1024)) }'
+    done
+done

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# script to check Edwards lab fairshare usage
+
+sshare --account=edwards_lab -a
