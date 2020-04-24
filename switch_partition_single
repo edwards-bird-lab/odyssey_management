@@ -1,0 +1,8 @@
+#/bin/bash
+
+# script to change the partition for a single queued (not running) job
+# arguments:
+# ${1} = jobID of job to switch
+# ${2} = new partition to switch to
+
+scontrol update jobid=${1} partition=${2}

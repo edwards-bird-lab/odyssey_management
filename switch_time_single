@@ -1,0 +1,8 @@
+#/bin/bash
+
+# script to change the time limit for a single queued (not running) job
+# arguments:
+# ${1} = jobID of job to switch
+# ${2} = new job time limit
+
+scontrol update jobid=${1} TimeLimit=${2}

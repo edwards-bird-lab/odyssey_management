@@ -1,0 +1,11 @@
+#/bin/bash
+
+# script to change the partition for jobs that are queued (not running)
+# note that this switches all running jobs!
+# arguments:
+# ${1} = new partition to switch to
+
+for i in $(squeue -u dcard -h -t PD -o %i)
+do
+scontrol update jobid=$i partition=${1}
+done

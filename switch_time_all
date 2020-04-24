@@ -1,0 +1,11 @@
+#/bin/bash
+
+# script to change the time limit for jobs that are queued (not running)
+# note that this switches all running jobs!
+# arguments:
+# ${1} = new job time limit
+
+for i in $(squeue -u dcard -h -t PD -o %i)
+do
+scontrol update jobid=$i TimeLimit=${1}
+done
