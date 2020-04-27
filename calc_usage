@@ -4,7 +4,11 @@
 # should be run in a location with a list of directories (e.g., user directories)
 # output is the total size of each directory in human readable format (analogous to du -sh)
 
-for dir in `ls -d */`
+# options
+# ${1} = can optionally provide a string to limit the search; do not include trailing "/"
+# e.g., "A" will quantify all directories beginning with A
+
+for dir in `ls -d ${1}*/`
 do
     find ${dir} -type f -group edwards_lab -print0 | du -ch --files0-from=- | \
     tail -n 1 | cut -f 1 | awk -v dir="${dir}" -v OFS="\t" '{ print dir, $1 }'

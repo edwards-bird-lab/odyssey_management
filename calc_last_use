@@ -4,7 +4,11 @@
 # should be run in a location with a list of directories (e.g., user directories)
 # output is a timestamp for the last time a file was accessed in each directory
 
-for dir in `ls -d */`
+# options
+# ${1} = can optionally provide a string to limit the search; do not include trailing "/"
+# e.g., "A" will quantify all directories beginning with A
+
+for dir in `ls -d ${1}*/`
 do \
 find ${dir} -printf "%T+\n" | sort -n | tail -1 | awk -v dir="${dir}" -v OFS="\t" '{ print dir, $1 }'; \
 done

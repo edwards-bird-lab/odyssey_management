@@ -4,9 +4,13 @@
 # should be run in a location with a list of directories (e.g., user directories)
 # output is the number of files and the total size of files in GB provided per directory and per file type
 
+# options
+# ${1} = can optionally provide a string to limit the search; do not include trailing "/"
+# e.g., "A" will quantify all directories beginning with A
+
 ftypes=".fasta .fa .fna .faa .fastq .fq .sam .vcf .bed .gff .gff3 .txt .out .err"
 
-for dir in `ls -d */`
+for dir in `ls -d ${1}*/`
 do
     echo "$dir"
     for ft in $ftypes
