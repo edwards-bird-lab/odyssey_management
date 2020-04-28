@@ -27,5 +27,3 @@ All scripts are quite basic and can be improved in various ways, but they should
 `switch_time_all` - change the time limit of all queued jobs
 
 `switch_time_single` - change the time limit of a single queued job
-
-change1
