@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+
+usage()
+{
+cat << EOF
+compressMaker
+
+Version 0.1 (2020-05-13)
+License: GNU GPLv2
+To report bugs or errors, please contact Daren Card (daren.card@gmail.com).
+This script is provided as-is, with no support and no guarantee of proper or
+desirable functioning.
+
+This script will compress the standard output of MAKER, potentially saving
+significant amounts of space. Based on (very limited) testing, it appears that 
+compressing could result in as little as roughly 15% the disk usage of the full
+output. This script can also be used to uncompress previously-compressed 
+MAKER output.
+
+The user must provide the absolute or relative path to the base directory of
+the MAKER output. By default this is "<genomeprefix.maker.output" but it can also
+be manually set by the user and could vary. The user may also choose to adjust
+the compression level, though the default of 9 (max compression) is suggested.
+The number of compression cores can also be set by the user.
+
+Note that this script relies on pigz for multi-threaded compression, though
+the default number of cores to use is 1. Ensure that pigz is installed for
+proper functioning. Also note that this script will not compress any additional,
+non-standard MAKER output that might be present, such as that created by
+the user. It is recommended that the user double check the sizes of all files 
+and perform additional compression, where necessary. This script should not
+modify any non-standard files/directories in the base directory.
+
+compressMaker -b <base_directory> -c -d [ -l <level> -t <threads> -h ]
+
+OPTIONS:
+        -h              usage information and help (this message)
+        -b              base directory of the MAKER output
+        -c              binary flag to compress the base directory contents [false]
+        -d              binary flag to decompress the base directory contents [false]
+	-l		the level of compression (1-9) [9]
+        -t              number of computer threads to use for compression [1]
+EOF
+}
+
+THREAD=1
+COMPRESS='false'
+DECOMPRESS='false'
+LEVEL=9
+
+while getopts "hb:cdl:t:" OPTION
+do
+        case $OPTION in
+                help)
+                        usage
+                        exit 1
+                        ;;
+                b)
+                        BASE=$OPTARG
+                        ;;
+                c)
+                        COMPRESS='true'
+                        ;;
+                d)
+                        DECOMPRESS='true'
+                        ;;
+		l)
+			LEVEL=$OPTARG
+			;;
+                t)
+                        THREAD=$OPTARG
+                        ;;
+                ?)
+                        usage
+                        exit
+                        ;;
+        esac
+done
+
+if [[ -z ${BASE} ]]
+then
+	usage
+	exit 1
+fi
+
+if [[ ${COMPRESS} == 'true' && ${DECOMPRESS} == 'true' ]]
+then
+	usage
+	exit 1
+fi
+
+if [[ ${COMPRESS} == 'true' ]]
+then
+	pigz -${LEVEL} -p ${THREAD} ${BASE}/*_master_datastore_index.log
+	tar cf - ${BASE}/mpi_blastdb | pigz -${LEVEL} -p ${THREAD} > ${BASE}/mpi_blastdb.tar.gz
+	datastore=`find ${BASE} -type d -name "*_datastore"`
+	tar cf - ${datastore} | pigz -${LEVEL} -p ${THREAD} > ${datastore}.tar.gz
+	rm -rf ${BASE}/mpi_blastdb ${datastore}
+fi
+
+if [[ ${DECOMPRESS} == 'true' ]]
+then
+	pigz -d -p ${THREAD} ${BASE}/*_master_datastore_index.log.gz
+	root=`basename ${BASE}/mpi_blastdb.tar.gz .tar.gz`
+	cmd="pigz -dc -p ${THREAD} ${BASE}/mpi_blastdb.tar.gz | tar xf - > ${BASE}/${root}"
+	eval $cmd
+	rm ${BASE}/mpi_blastdb.tar.gz
+	datastore=`find ${BASE} -type f -name "*_datastore.tar.gz"`
+	root=`basename ${datastore} .tar.gz`
+	cmd="pigz -dc -p ${THREAD} ${datastore} | tar xf - > ${BASE}/${root}"
+	eval $cmd
+	rm ${datastore}
+fi
