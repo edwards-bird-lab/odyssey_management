@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# script to identify the largest files and quantify their storage impact
+# should be run in a location with a list of directories (e.g., user directories)
+# by default, this only considers files >= 50 MB, so adjustments must be made if this threshold needs to be changed
+# output is the number of files and the total size of files in GB provided per directory and per file type
+
+# options
+# ${1} = can optionally provide a string to limit the search; do not include trailing "/"
+# e.g., "A" will quantify all directories beginning with A
+
+for dir in `ls -d ${1}*/`
+do
+    find $dir -group edwards_lab -type f -size +50M -exec ls -lh {} \; | \
+    awk -v OFS="\t" -v dir="$dir" '{ print dir, $5, $9 }' | sort -k2,2hr
+done
