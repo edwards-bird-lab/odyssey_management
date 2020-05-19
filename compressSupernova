@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+
+usage()
+{
+cat << EOF
+compressSupernova
+
+Version 0.1 (2020-05-13)
+License: GNU GPLv2
+To report bugs or errors, please contact Daren Card (daren.card@gmail.com).
+This script is provided as-is, with no support and no guarantee of proper or
+desirable functioning.
+
+This script will compress the standard output of 10x Supernova, potentially saving
+significant amounts of space. Based on (very limited) testing, it appears that
+compressing could result in as little as roughly 40% the disk usage of the full
+output. This script can also be used to uncompress previously-compressed
+Supernova output.
+
+The user must provide the absolute or relative path to the base directory of
+the Supernova output. This output directory name is set manually by the user
+using the "--id" flag and this script compresses the contents of "assembly"
+within this base directory. The user may also choose to adjust the compression
+level, though the default of 9 (max compression) is suggested. The number of
+compression cores can also be set by the user.
+
+Note that this script relies on pigz for multi-threaded compression, though
+the default number of cores to use is 1. Ensure that pigz is installed for
+proper functioning. Also note that this script will not compress any additional,
+non-standard Supernova output that might be present, such as that created by
+the user. For example, sometimes runs will retain very large "ASSEMBLER_CS"
+directories for unknown reasons that are hundreds of GB when they should be
+on the order of 30-40 MB, so manually deletion/compression may be necessary.
+It is recommended that the user double check the sizes of all files
+and perform additional compression, where necessary. This script should not
+modify any non-standard files/directories in the base directory.
+
+compressSupernova -b <base_directory> -c -d [ -l <level> -t <threads> -h ]
+
+OPTIONS:
+        -h              usage information and help (this message)
+        -b              base directory of the Supernova output
+        -c              binary flag to compress the base directory contents [false]
+        -d              binary flag to decompress the base directory contents [false]
+	-l		the level of compression (1-9) [9]
+        -t              number of computer threads to use for compression [1]
+EOF
+}
+
+THREAD=1
+COMPRESS='false'
+DECOMPRESS='false'
+LEVEL=9
+
+while getopts "hb:cdl:t:" OPTION
+do
+        case $OPTION in
+                help)
+                        usage
+                        exit 1
+                        ;;
+                b)
+                        BASE=$OPTARG
+                        ;;
+                c)
+                        COMPRESS='true'
+                        ;;
+                d)
+                        DECOMPRESS='true'
+                        ;;
+		l)
+			LEVEL=$OPTARG
+			;;
+                t)
+                        THREAD=$OPTARG
+                        ;;
+                ?)
+                        usage
+                        exit
+                        ;;
+        esac
+done
+
+if [[ -z ${BASE} ]]
+then
+	usage
+	exit 1
+fi
+
+if [[ ${COMPRESS} == 'true' && ${DECOMPRESS} == 'true' ]]
+then
+	usage
+	exit 1
+fi
+
+if [[ ${COMPRESS} == 'true' ]]
+then
+	tar cf - ${BASE}/a.48 | pigz -${LEVEL} -p ${THREAD} > ${BASE}/a.48.tar.gz
+	rm -rf ${BASE}/a.48
+	tar cf - ${BASE}/a.base | pigz -${LEVEL} -p ${THREAD} > ${BASE}/a.base.tar.gz
+	rm -rf ${BASE}/a.base
+	tar cf - ${BASE}/a.patched | pigz -${LEVEL} -p ${THREAD} > ${BASE}/a.patched.tar.gz
+	rm -rf ${BASE}/a.patched
+	tar cf - ${BASE}/data | pigz -${LEVEL} -p ${THREAD} > ${BASE}/data.tar.gz
+	rm -rf ${BASE}/data
+
+	pigz -${LEVEL} -p ${THREAD} ${BASE}/a.cpaths
+	pigz -${LEVEL} -p ${THREAD} ${BASE}/closures.fastb
+fi
+
+if [[ ${DECOMPRESS} == 'true' ]]
+then
+	pigz -dc -p ${THREAD} ${BASE}/a.48.tar.gz | tar xf - > ${BASE}/a.48
+	rm ${BASE}/a.48.tar.gz
+	pigz -dc -p ${THREAD} ${BASE}/a.base.tar.gz | tar xf - > ${BASE}/a.base
+	rm ${BASE}/a.base.tar.gz
+	pigz -dc -p ${THREAD} ${BASE}/a.patched.tar.gz | tar xf - > ${BASE}/a.patched
+	rm ${BASE}/a.patched.tar.gz
+	pigz -dc -p ${THREAD} ${BASE}/data.tar.gz | tar xf - > ${BASE}/data
+	rm ${BASE}/data.tar.gz
+
+	pigz -d -p ${THREAD} ${BASE}/a.cpaths.gz
+        pigz -d -p ${THREAD} ${BASE}/closures.fastb.gz
+fi
