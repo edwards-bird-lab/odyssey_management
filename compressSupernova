@@ -95,30 +95,30 @@ fi
 
 if [[ ${COMPRESS} == 'true' ]]
 then
-	tar cf - ${BASE}/a.48 | pigz -${LEVEL} -p ${THREAD} > ${BASE}/a.48.tar.gz
-	rm -rf ${BASE}/a.48
-	tar cf - ${BASE}/a.base | pigz -${LEVEL} -p ${THREAD} > ${BASE}/a.base.tar.gz
-	rm -rf ${BASE}/a.base
-	tar cf - ${BASE}/a.patched | pigz -${LEVEL} -p ${THREAD} > ${BASE}/a.patched.tar.gz
-	rm -rf ${BASE}/a.patched
-	tar cf - ${BASE}/data | pigz -${LEVEL} -p ${THREAD} > ${BASE}/data.tar.gz
-	rm -rf ${BASE}/data
+	tar cf - ${BASE}/outs/assembly/a.48 | pigz -${LEVEL} -p ${THREAD} > ${BASE}/outs/assembly/a.48.tar.gz
+	rm -rf ${BASE}/outs/assembly/a.48
+	tar cf - ${BASE}/outs/assembly/a.base | pigz -${LEVEL} -p ${THREAD} > ${BASE}/outs/assembly/a.base.tar.gz
+	rm -rf ${BASE}/outs/assembly/a.base
+	tar cf - ${BASE}/outs/assembly/a.patched | pigz -${LEVEL} -p ${THREAD} > ${BASE}/outs/assembly/a.patched.tar.gz
+	rm -rf ${BASE}/outs/assembly/a.patched
+	tar cf - ${BASE}/outs/assembly/data | pigz -${LEVEL} -p ${THREAD} > ${BASE}/outs/assembly/data.tar.gz
+	rm -rf ${BASE}/outs/assembly/data
 
-	pigz -${LEVEL} -p ${THREAD} ${BASE}/a.cpaths
-	pigz -${LEVEL} -p ${THREAD} ${BASE}/closures.fastb
+	pigz -${LEVEL} -p ${THREAD} ${BASE}/outs/assembly/a.cpaths
+	pigz -${LEVEL} -p ${THREAD} ${BASE}/outs/assembly/closures.fastb
 fi
 
 if [[ ${DECOMPRESS} == 'true' ]]
 then
-	pigz -dc -p ${THREAD} ${BASE}/a.48.tar.gz | tar xf - > ${BASE}/a.48
-	rm ${BASE}/a.48.tar.gz
-	pigz -dc -p ${THREAD} ${BASE}/a.base.tar.gz | tar xf - > ${BASE}/a.base
-	rm ${BASE}/a.base.tar.gz
-	pigz -dc -p ${THREAD} ${BASE}/a.patched.tar.gz | tar xf - > ${BASE}/a.patched
-	rm ${BASE}/a.patched.tar.gz
-	pigz -dc -p ${THREAD} ${BASE}/data.tar.gz | tar xf - > ${BASE}/data
-	rm ${BASE}/data.tar.gz
+	pigz -dc -p ${THREAD} ${BASE}/outs/assembly/a.48.tar.gz | tar xf - > ${BASE}/outs/assembly/a.48
+	rm ${BASE}/outs/assembly/a.48.tar.gz
+	pigz -dc -p ${THREAD} ${BASE}/outs/assembly/a.base.tar.gz | tar xf - > ${BASE}/outs/assembly/a.base
+	rm ${BASE}/outs/assembly/a.base.tar.gz
+	pigz -dc -p ${THREAD} ${BASE}/outs/assembly/a.patched.tar.gz | tar xf - > ${BASE}/outs/assembly/a.patched
+	rm ${BASE}/outs/assembly/a.patched.tar.gz
+	pigz -dc -p ${THREAD} ${BASE}/outs/assembly/data.tar.gz | tar xf - > ${BASE}/outs/assembly/data
+	rm ${BASE}/outs/assembly/data.tar.gz
 
-	pigz -d -p ${THREAD} ${BASE}/a.cpaths.gz
-        pigz -d -p ${THREAD} ${BASE}/closures.fastb.gz
+	pigz -d -p ${THREAD} ${BASE}/outs/assembly/a.cpaths.gz
+        pigz -d -p ${THREAD} ${BASE}/outs/assembly/closures.fastb.gz
 fi
