@@ -82,81 +82,101 @@ done
 
 if [[ -z ${BASE} ]]
 then
+	echo -e 'Error: base directory not provided.\n' >&2
 	usage
 	exit 1
 fi
 
 if [[ ${COMPRESS} == 'true' && ${DECOMPRESS} == 'true' ]]
 then
+	echo -e 'Error: compression and decompression both selected.\n' >&2
 	usage
 	exit 1
 fi
+
+if [[ ${COMPRESS} == 'false' && ${DECOMPRESS} == 'false' ]]
+then
+        echo -e 'Error: compression or decompression not selected.\n' >&2
+        usage
+        exit 1
+fi
+
+if ! [[ -x "$(command -v pigz)" ]]
+then
+	echo -e 'Error: pigz is not installed.\n' >&2
+	usage
+	exit 1
+fi
+
 
 if [[ ${COMPRESS} == 'true' ]]
 then
 # normal Trinity mode
         if [[ -f ${BASE}/Trinity.fasta ]]
         then
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/both.fa
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/inchworm.fa
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/jellyfish.kmers.25.asm.fa
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/partitioned_reads.files.list
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/recursive_trinity.cmds.completed
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/recursive_trinity.cmds
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/scaffolding_entries.sam
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/Trinity.fasta.gene_trans_map
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/Trinity.fasta
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/both.fa &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/inchworm.fa &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/jellyfish.kmers.25.asm.fa &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/partitioned_reads.files.list &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/recursive_trinity.cmds.completed &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/recursive_trinity.cmds &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/scaffolding_entries.sam &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/Trinity.fasta.gene_trans_map &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/Trinity.fasta &&
 
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/bundled_iworm_contigs.fasta
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/GraphFromIwormFasta.out
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100.?.bt2
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100.rev.?.bt2
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt.sorted
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt.sorted.wIwormNames
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_scaffolds.txt
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/readsToComponents.out
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/readsToComponents.out.sort
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/bundled_iworm_contigs.fasta &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/GraphFromIwormFasta.out &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100.?.bt2 &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100 &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100.rev.?.bt2 &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt.sorted &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt.sorted.wIwormNames &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_scaffolds.txt &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/readsToComponents.out &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/readsToComponents.out.sort &&
+
+                tar cf - ${BASE}/read_partitions | pigz -${LEVEL} -p ${THREAD} > ${BASE}/read_partitions.tar.gz &&
+                rm -rf ${BASE}/read_partitions &&
 
 		pigz -${LEVEL} -p ${THREAD} ${BASE}/insilico_read_normalization/*.fq
 	
-		tar cf - ${BASE}/read_partitions | pigz -${LEVEL} -p ${THREAD} > ${BASE}/read_partitions.tar.gz
-		rm -rf ${BASE}/read_partitions
 # reference guided Trinity mode
         elif [[ -f ${BASE}/Trinity-GG.fasta ]]
         then
                 for dir in `find ${base} -type d -name "Dir_*_merged_stranded.bam.norm_200.bam.?.sam.minC1.gff"`
                 do
-                        cmd="tar cf - ${dir} | pigz -${LEVEL} -p ${THREAD} > ${dir}.tar.gz"
-                        eval $cmd
+                        cmd="tar cf - ${dir} | pigz -${LEVEL} -p ${THREAD} > ${dir}.tar.gz" &&
+                        eval $cmd &&
                         rm -rf ${dir}
                 done
 
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/Dir_*_merged_stranded.bam.norm_200.bam.-.sam.minC1.gff.listing
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/Dir_*_merged_stranded.bam.norm_200.bam.+.sam.minC1.gff.listing
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/read_files.list
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.frag_coords
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.frag_coords
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.frag_coverage.wig
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.frag_coverage.wig
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.minC1.gff
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.minC1.gff
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.read_coords
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.read_coords
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.read_coords.sort_by_readname
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.read_coords.sort_by_readname
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/trinity_GG.cmds
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/trinity_GG.cmds.completed
-		pigz -${LEVEL} -p ${THREAD} ${BASE}/Trinity-GG.fasta
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/Dir_*_merged_stranded.bam.norm_200.bam.-.sam.minC1.gff.listing &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/Dir_*_merged_stranded.bam.norm_200.bam.+.sam.minC1.gff.listing &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/read_files.list &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.frag_coords &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.frag_coords &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.frag_coverage.wig &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.frag_coverage.wig &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.minC1.gff &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.minC1.gff &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.read_coords &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.read_coords &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.read_coords.sort_by_readname &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.read_coords.sort_by_readname &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/trinity_GG.cmds &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/trinity_GG.cmds.completed &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/Trinity-GG.fasta &&
 		pigz -${LEVEL} -p ${THREAD} ${BASE}/Trinity-GG.fasta.gene_trans_map
 
         else
-                echo -e "\nError: Cannot detect the type of Trinity run to compress. Please ensure that one of the Trinity files is provided in the base directory:"
+                echo -e "Error: Cannot detect the type of Trinity run to compress. Please ensure that one of the Trinity files is provided in the base directory:"
 		echo -e "1. Trinity.fasta must be present for the normal Trinity mode"
 		echo -e "2. Trinity-GG.fasta must be present for the genome-guided Trinity mode.\n"
+		usage
+        	exit 1
 	fi
 fi
 
@@ -165,68 +185,71 @@ then
 # normal Trinity mode
         if [[ -f ${BASE}/Trinity.fasta.gz ]]
 	then
-		pigz -d -p ${THREAD} ${BASE}/both.fa.gz
-        	pigz -d -p ${THREAD} ${BASE}/inchworm.fa.gz
-	        pigz -d -p ${THREAD} ${BASE}/jellyfish.kmers.25.asm.fa.gz
-       		pigz -d -p ${THREAD} ${BASE}/partitioned_reads.files.list.gz
-	        pigz -d -p ${THREAD} ${BASE}/recursive_trinity.cmds.completed.gz
-	        pigz -d -p ${THREAD} ${BASE}/recursive_trinity.cmds.gz
-	        pigz -d -p ${THREAD} ${BASE}/scaffolding_entries.sam.gz
-	        pigz -d -p ${THREAD} ${BASE}/Trinity.fasta.gene_trans_map.gz
-	        pigz -d -p ${THREAD} ${BASE}/Trinity.fasta.gz
+		pigz -d -p ${THREAD} ${BASE}/both.fa.gz &&
+        	pigz -d -p ${THREAD} ${BASE}/inchworm.fa.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/jellyfish.kmers.25.asm.fa.gz &&
+       		pigz -d -p ${THREAD} ${BASE}/partitioned_reads.files.list.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/recursive_trinity.cmds.completed.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/recursive_trinity.cmds.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/scaffolding_entries.sam.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/Trinity.fasta.gene_trans_map.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/Trinity.fasta.gz &&
 
-	        pigz -d -p ${THREAD} ${BASE}/chrysalis/bundled_iworm_contigs.fasta.gz
-	        pigz -d -p ${THREAD} ${BASE}/chrysalis/GraphFromIwormFasta.out.gz
-	        pigz -d -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100.?.bt2.gz
-	        pigz -d -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100.gz
-	        pigz -d -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100.rev.?.bt2.gz
-	        pigz -d -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt.gz
-	        pigz -d -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt.sorted.gz
-	        pigz -d -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt.sorted.wIwormNames.gz
-	        pigz -d -p ${THREAD} ${BASE}/chrysalis/iworm_scaffolds.txt.gz
-	        pigz -d -p ${THREAD} ${BASE}/chrysalis/readsToComponents.out.gz
-	        pigz -d -p ${THREAD} ${BASE}/chrysalis/readsToComponents.out.sort.gz
+	        pigz -d -p ${THREAD} ${BASE}/chrysalis/bundled_iworm_contigs.fasta.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/chrysalis/GraphFromIwormFasta.out.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100.?.bt2.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100.rev.?.bt2.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt.sorted.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt.sorted.wIwormNames.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/chrysalis/iworm_scaffolds.txt.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/chrysalis/readsToComponents.out.gz &&
+	        pigz -d -p ${THREAD} ${BASE}/chrysalis/readsToComponents.out.sort.gz &&
+
+                root=`basename ${BASE}/read_partitions.tar.gz .tar.gz` &&
+                cmd="pigz -dc -p ${THREAD} ${BASE}/read_partitions.tar.gz | tar xf - > ${BASE}/${root}" &&
+                eval $cmd &&
+                rm ${BASE}/read_partitions.tar.gz &&
 
 	        pigz -d -p ${THREAD} ${BASE}/insilico_read_normalization/*.fq.gz
 
-		root=`basename ${BASE}/read_partitions.tar.gz .tar.gz`
-	        cmd="pigz -dc -p ${THREAD} ${BASE}/read_partitions.tar.gz | tar xf - > ${BASE}/${root}"
-	        eval $cmd
-		rm ${BASE}/read_partitions.tar.gz
 # reference guided Trinity mode
 	elif [[ -f ${BASE}/Trinity-GG.fasta.gz ]]
 	then
                 for tarball in `find ${base} -type f -name "Dir_*_merged_stranded.bam.norm_200.bam.?.sam.minC1.gff.tar.gz"`
                 do
-			root=`basename ${tarball} .tar.gz`
-                        cmd="pigz -dc -p ${THREAD} ${tarball} | tar xf - > ${BASE}/${root}"
-                        eval $cmd
+			root=`basename ${tarball} .tar.gz` &&
+                        cmd="pigz -dc -p ${THREAD} ${tarball} | tar xf - > ${BASE}/${root}" &&
+                        eval $cmd &&
                         rm -rf ${tarball}
                 done
 
-		pigz -d -p ${THREAD} ${BASE}/Dir_*_merged_stranded.bam.norm_200.bam.-.sam.minC1.gff.listing.gz
-		pigz -d -p ${THREAD} ${BASE}/Dir_*_merged_stranded.bam.norm_200.bam.+.sam.minC1.gff.listing.gz
-		pigz -d -p ${THREAD} ${BASE}/read_files.list.gz
-		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.gz
-		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.gz
-		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.frag_coords.gz
-		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.frag_coords.gz
-		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.frag_coverage.wig.gz
-		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.frag_coverage.wig.gz
-		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.minC1.gff.gz
-		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.minC1.gff.gz
-		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.read_coords.gz
-		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.read_coords.gz
-		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.read_coords.sort_by_readname.gz
-		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.read_coords.sort_by_readname.gz
-		pigz -d -p ${THREAD} ${BASE}/trinity_GG.cmds.gz
-		pigz -d -p ${THREAD} ${BASE}/trinity_GG.cmds.completed.gz
-		pigz -d -p ${THREAD} ${BASE}/Trinity-GG.fasta.gz
+		pigz -d -p ${THREAD} ${BASE}/Dir_*_merged_stranded.bam.norm_200.bam.-.sam.minC1.gff.listing.gz &&
+		pigz -d -p ${THREAD} ${BASE}/Dir_*_merged_stranded.bam.norm_200.bam.+.sam.minC1.gff.listing.gz &&
+		pigz -d -p ${THREAD} ${BASE}/read_files.list.gz &&
+		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.gz &&
+		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.gz &&
+		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.frag_coords.gz &&
+		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.frag_coords.gz &&
+		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.frag_coverage.wig.gz &&
+		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.frag_coverage.wig.gz &&
+		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.minC1.gff.gz &&
+		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.minC1.gff.gz &&
+		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.read_coords.gz &&
+		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.read_coords.gz &&
+		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.-.sam.read_coords.sort_by_readname.gz &&
+		pigz -d -p ${THREAD} ${BASE}/*_merged_stranded.bam.norm_200.bam.+.sam.read_coords.sort_by_readname.gz &&
+		pigz -d -p ${THREAD} ${BASE}/trinity_GG.cmds.gz &&
+		pigz -d -p ${THREAD} ${BASE}/trinity_GG.cmds.completed.gz &&
+		pigz -d -p ${THREAD} ${BASE}/Trinity-GG.fasta.gz &&
 		pigz -d -p ${THREAD} ${BASE}/Trinity-GG.fasta.gene_trans_map.gz
 
 	else
-	        echo -e "\nError: Cannot detect the type of Trinity run to decompress. Please ensure that one of the Trinity files is present in the base directory:"
+	        echo -e "Error: Cannot detect the type of Trinity run to decompress. Please ensure that one of the Trinity files is present in the base directory:"
                 echo -e "1. Trinity.fasta.gz must be present for the normal Trinity mode"
                 echo -e "2. Trinity-GG.fasta.gz must be present for the genome-guided Trinity mode.\n"
+		usage
+        	exit 1
 	fi
 fi

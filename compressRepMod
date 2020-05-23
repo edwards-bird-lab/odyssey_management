@@ -79,40 +79,57 @@ done
 
 if [[ -z ${BASE} ]]
 then
+	echo -e 'Error: base directory not provided.\n' >&2
 	usage
 	exit 1
 fi
 
 if [[ ${COMPRESS} == 'true' && ${DECOMPRESS} == 'true' ]]
 then
+	echo -e 'Error: compression and decompression both selected.\n' >&2
 	usage
 	exit 1
 fi
 
+if [[ ${COMPRESS} == 'false' && ${DECOMPRESS} == 'false' ]]
+then
+        echo -e 'Error: compression or decompression not selected.\n' >&2
+        usage
+        exit 1
+fi
+
+if ! [[ -x "$(command -v pigz)" ]]
+then
+	echo -e 'Error: pigz is not installed.\n' >&2
+	usage
+	exit 1
+fi
+
+
 if [[ ${COMPRESS} == 'true' ]]
 then
-	pigz -${LEVEL} -p ${THREAD} ${BASE}/consensi.fa.classified
-	pigz -${LEVEL} -p ${THREAD} ${BASE}/consensi.fa
-	pigz -${LEVEL} -p ${THREAD} ${BASE}/consensi.fa.masked
-	pigz -${LEVEL} -p ${THREAD} ${BASE}/families-classified.stk
-	pigz -${LEVEL} -p ${THREAD} ${BASE}/families.stk
+	pigz -${LEVEL} -p ${THREAD} ${BASE}/consensi.fa.classified &&
+	pigz -${LEVEL} -p ${THREAD} ${BASE}/consensi.fa &&
+	pigz -${LEVEL} -p ${THREAD} ${BASE}/consensi.fa.masked &&
+	pigz -${LEVEL} -p ${THREAD} ${BASE}/families-classified.stk &&
+	pigz -${LEVEL} -p ${THREAD} ${BASE}/families.stk &&
 	for round in `find ${BASE} -type d -name round-?`
 	do
-		tar cf - ${round} | pigz -${LEVEL} -p ${THREAD} > ${round}.tar.gz
+		tar cf - ${round} | pigz -${LEVEL} -p ${THREAD} > ${round}.tar.gz &&
 		rm -rf ${round}
 	done	
 fi
 
 if [[ ${DECOMPRESS} == 'true' ]]
 then
-        pigz -d -p ${THREAD} ${BASE}/consensi.fa.classified.gz
-        pigz -d -p ${THREAD} ${BASE}/consensi.fa.gz
-        pigz -d -p ${THREAD} ${BASE}/consensi.fa.masked.gz
-        pigz -d -p ${THREAD} ${BASE}/families-classified.stk.gz
-        pigz -d -p ${THREAD} ${BASE}/families.stk.gz
+        pigz -d -p ${THREAD} ${BASE}/consensi.fa.classified.gz &&
+        pigz -d -p ${THREAD} ${BASE}/consensi.fa.gz &&
+        pigz -d -p ${THREAD} ${BASE}/consensi.fa.masked.gz &&
+        pigz -d -p ${THREAD} ${BASE}/families-classified.stk.gz &&
+        pigz -d -p ${THREAD} ${BASE}/families.stk.gz &&
         for round in `find ${BASE} -type f -name round-?.tar.gz`
         do
-		root=`basename ${round} .tar.gz`
+		root=`basename ${round} .tar.gz` &&
                 pigz -dc -p ${THREAD} ${round} | tar xf - > ${BASE}/${root}
 		rm ${round}
         done

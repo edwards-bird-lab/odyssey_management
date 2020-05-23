@@ -83,42 +83,59 @@ done
 
 if [[ -z ${BASE} ]]
 then
+	echo -e 'Error: base directory not provided.\n' >&2
 	usage
 	exit 1
 fi
 
 if [[ ${COMPRESS} == 'true' && ${DECOMPRESS} == 'true' ]]
 then
+	echo -e 'Error: compression and decompression both selected.\n' >&2
 	usage
 	exit 1
 fi
 
+if [[ ${COMPRESS} == 'false' && ${DECOMPRESS} == 'false' ]]
+then
+        echo -e 'Error: compression or decompression not selected.\n' >&2
+        usage
+        exit 1
+fi
+
+if ! [[ -x "$(command -v pigz)" ]]
+then
+	echo -e 'Error: pigz is not installed.\n' >&2
+	usage
+	exit 1
+fi
+
+
 if [[ ${COMPRESS} == 'true' ]]
 then
-	tar cf - ${BASE}/outs/assembly/a.48 | pigz -${LEVEL} -p ${THREAD} > ${BASE}/outs/assembly/a.48.tar.gz
-	rm -rf ${BASE}/outs/assembly/a.48
-	tar cf - ${BASE}/outs/assembly/a.base | pigz -${LEVEL} -p ${THREAD} > ${BASE}/outs/assembly/a.base.tar.gz
-	rm -rf ${BASE}/outs/assembly/a.base
-	tar cf - ${BASE}/outs/assembly/a.patched | pigz -${LEVEL} -p ${THREAD} > ${BASE}/outs/assembly/a.patched.tar.gz
-	rm -rf ${BASE}/outs/assembly/a.patched
-	tar cf - ${BASE}/outs/assembly/data | pigz -${LEVEL} -p ${THREAD} > ${BASE}/outs/assembly/data.tar.gz
-	rm -rf ${BASE}/outs/assembly/data
+	tar cf - ${BASE}/outs/assembly/a.48 | pigz -${LEVEL} -p ${THREAD} > ${BASE}/outs/assembly/a.48.tar.gz &&
+	rm -rf ${BASE}/outs/assembly/a.48 &&
+	tar cf - ${BASE}/outs/assembly/a.base | pigz -${LEVEL} -p ${THREAD} > ${BASE}/outs/assembly/a.base.tar.gz &&
+	rm -rf ${BASE}/outs/assembly/a.base &&
+	tar cf - ${BASE}/outs/assembly/a.patched | pigz -${LEVEL} -p ${THREAD} > ${BASE}/outs/assembly/a.patched.tar.gz &&
+	rm -rf ${BASE}/outs/assembly/a.patched &&
+	tar cf - ${BASE}/outs/assembly/data | pigz -${LEVEL} -p ${THREAD} > ${BASE}/outs/assembly/data.tar.gz &&
+	rm -rf ${BASE}/outs/assembly/data &&
 
-	pigz -${LEVEL} -p ${THREAD} ${BASE}/outs/assembly/a.cpaths
+	pigz -${LEVEL} -p ${THREAD} ${BASE}/outs/assembly/a.cpaths &&
 	pigz -${LEVEL} -p ${THREAD} ${BASE}/outs/assembly/closures.fastb
 fi
 
 if [[ ${DECOMPRESS} == 'true' ]]
 then
-	pigz -dc -p ${THREAD} ${BASE}/outs/assembly/a.48.tar.gz | tar xf - > ${BASE}/outs/assembly/a.48
-	rm ${BASE}/outs/assembly/a.48.tar.gz
-	pigz -dc -p ${THREAD} ${BASE}/outs/assembly/a.base.tar.gz | tar xf - > ${BASE}/outs/assembly/a.base
-	rm ${BASE}/outs/assembly/a.base.tar.gz
-	pigz -dc -p ${THREAD} ${BASE}/outs/assembly/a.patched.tar.gz | tar xf - > ${BASE}/outs/assembly/a.patched
-	rm ${BASE}/outs/assembly/a.patched.tar.gz
-	pigz -dc -p ${THREAD} ${BASE}/outs/assembly/data.tar.gz | tar xf - > ${BASE}/outs/assembly/data
-	rm ${BASE}/outs/assembly/data.tar.gz
+	pigz -dc -p ${THREAD} ${BASE}/outs/assembly/a.48.tar.gz | tar xf - > ${BASE}/outs/assembly/a.48 &&
+	rm ${BASE}/outs/assembly/a.48.tar.gz &&
+	pigz -dc -p ${THREAD} ${BASE}/outs/assembly/a.base.tar.gz | tar xf - > ${BASE}/outs/assembly/a.base &&
+	rm ${BASE}/outs/assembly/a.base.tar.gz &&
+	pigz -dc -p ${THREAD} ${BASE}/outs/assembly/a.patched.tar.gz | tar xf - > ${BASE}/outs/assembly/a.patched &&
+	rm ${BASE}/outs/assembly/a.patched.tar.gz &&
+	pigz -dc -p ${THREAD} ${BASE}/outs/assembly/data.tar.gz | tar xf - > ${BASE}/outs/assembly/data &&
+	rm ${BASE}/outs/assembly/data.tar.gz &&
 
-	pigz -d -p ${THREAD} ${BASE}/outs/assembly/a.cpaths.gz
+	pigz -d -p ${THREAD} ${BASE}/outs/assembly/a.cpaths.gz &&
         pigz -d -p ${THREAD} ${BASE}/outs/assembly/closures.fastb.gz
 fi

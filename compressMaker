@@ -79,35 +79,51 @@ done
 
 if [[ -z ${BASE} ]]
 then
+	echo -e 'Error: base directory not provided.\n' >&2
 	usage
 	exit 1
 fi
 
 if [[ ${COMPRESS} == 'true' && ${DECOMPRESS} == 'true' ]]
 then
+	echo -e 'Error: compression and decompression both selected.\n' >&2
+	usage
+	exit 1
+fi
+
+if [[ ${COMPRESS} == 'false' && ${DECOMPRESS} == 'false' ]]
+then
+        echo -e 'Error: compression or decompression not selected.\n' >&2
+        usage
+        exit 1
+fi
+
+if ! [[ -x "$(command -v pigz)" ]]
+then
+	echo -e 'Error: pigz is not installed.\n' >&2
 	usage
 	exit 1
 fi
 
 if [[ ${COMPRESS} == 'true' ]]
 then
-	pigz -${LEVEL} -p ${THREAD} ${BASE}/*_master_datastore_index.log
-	tar cf - ${BASE}/mpi_blastdb | pigz -${LEVEL} -p ${THREAD} > ${BASE}/mpi_blastdb.tar.gz
-	datastore=`find ${BASE} -type d -name "*_datastore"`
-	tar cf - ${datastore} | pigz -${LEVEL} -p ${THREAD} > ${datastore}.tar.gz
+	pigz -${LEVEL} -p ${THREAD} ${BASE}/*_master_datastore_index.log &&
+	tar cf - ${BASE}/mpi_blastdb | pigz -${LEVEL} -p ${THREAD} > ${BASE}/mpi_blastdb.tar.gz &&
+	datastore=`find ${BASE} -type d -name "*_datastore"` &&
+	tar cf - ${datastore} | pigz -${LEVEL} -p ${THREAD} > ${datastore}.tar.gz &&
 	rm -rf ${BASE}/mpi_blastdb ${datastore}
 fi
 
 if [[ ${DECOMPRESS} == 'true' ]]
 then
-	pigz -d -p ${THREAD} ${BASE}/*_master_datastore_index.log.gz
-	root=`basename ${BASE}/mpi_blastdb.tar.gz .tar.gz`
-	cmd="pigz -dc -p ${THREAD} ${BASE}/mpi_blastdb.tar.gz | tar xf - > ${BASE}/${root}"
-	eval $cmd
-	rm ${BASE}/mpi_blastdb.tar.gz
-	datastore=`find ${BASE} -type f -name "*_datastore.tar.gz"`
-	root=`basename ${datastore} .tar.gz`
-	cmd="pigz -dc -p ${THREAD} ${datastore} | tar xf - > ${BASE}/${root}"
-	eval $cmd
+	pigz -d -p ${THREAD} ${BASE}/*_master_datastore_index.log.gz &&
+	root=`basename ${BASE}/mpi_blastdb.tar.gz .tar.gz`&&
+	cmd="pigz -dc -p ${THREAD} ${BASE}/mpi_blastdb.tar.gz | tar xf - > ${BASE}/${root}" &&
+	eval $cmd &&
+	rm ${BASE}/mpi_blastdb.tar.gz &&
+	datastore=`find ${BASE} -type f -name "*_datastore.tar.gz"` &&
+	root=`basename ${datastore} .tar.gz` &&
+	cmd="pigz -dc -p ${THREAD} ${datastore} | tar xf - > ${BASE}/${root}" &&
+	eval $cmd &&
 	rm ${datastore}
 fi
