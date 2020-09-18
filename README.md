@@ -16,9 +16,21 @@ All scripts are quite basic and can be improved in various ways, but they should
 
 `check_storage_quota` - summarize current cluster storge usage in the `scratchlfs` and `holylfs` locations
 
+`compressMaker` - automated compression of raw MAKER outputs
+
+`compressRepMod` - automated compression of raw RepeatModeler outputs
+
+`compressSupernova` - automated compression of raw Supernova outputs
+
+`compressTrinity` - automated compression of raw Trinity outputs
+
+`fastq_compress` - Slurm job script for compressing all larger (>100 MB) FASTQ files in a directory using GZIP
+
 `intrun` - start up an interactive session so commands are not run on login nodes
 
 `jobscript_template` - write a job script template to the terminal for help creating a new job script
+
+`sam_compress` - Slurm job script for compressing all larger (>100 MB) SAM files in a directory to BAM
 
 `switch_partition_all` - switch the run partition of all queued jobs
 
