@@ -1,0 +1,41 @@
+#!/bin/bash
+#SBATCH -n 8                # Number of cores
+#SBATCH -N 1                # Ensure that all cores are on one machine
+#SBATCH --constraint=intel  # only use faster intel cores
+#SBATCH -t 3-00:00          # Runtime in D-HH:MM, minimum of 10 minutes
+#SBATCH -p shared  # Partition to submit to
+#SBATCH --mem=16000           # Memory pool for all cores (see also --mem-per-cpu)
+#SBATCH	-J fastq_compress            # Job name for job
+#SBATCH -o fastq_compress_%j.out  # File to which STDOUT will be written, %j inserts jobid
+#SBATCH -e fastq_compress_%j.err  # File to which STDERR will be written, %j inserts jobid
+#SBATCH --mail-type=ALL        # Type of email notification- BEGIN,END,FAIL,ALL
+#SBATCH --mail-user= # Email to which notifications will be sent
+
+# arguments
+# ${1} = the folder location to compress FASTQ
+# within this folder, all .fq/.fastq files greater than 100 MB will be compressed
+# and the original files will be deleted
+
+if [[ $# -eq 0 ]]; then
+	echo "ERROR: No directory provided to search for FASTQ files"
+	echo "Try issuing the following commands with <target_directory> set to the directory where you want to compress FASTQ files:"
+	echo "$ directory=<target_directory>"
+	echo "$ sbatch -o \${directory}_fastq_compress.out -e \${directory}_fastq_compress.err fastq_compress \${directory}"
+	exit 1
+fi
+
+# load modules and environments
+module load GCCcore/8.2.0 pigz/2.4
+
+# commands to run
+find ${1} -type f -name "*.fastq" -size +100M | 
+while read file; 
+do 
+pigz -p ${SLURM_NTASKS} ${file} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2) 
+done
+
+find ${1} -type f -name "*.fq" -size +100M |
+while read file;
+do 
+pigz -p ${SLURM_NTASKS} ${file} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2)
+done
