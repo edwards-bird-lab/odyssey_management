@@ -114,27 +114,27 @@ then
 # normal Trinity mode
         if [[ -f ${BASE}/Trinity.fasta ]]
         then
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/both.fa &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/inchworm.fa &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/jellyfish.kmers.25.asm.fa &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/partitioned_reads.files.list &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/recursive_trinity.cmds.completed &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/recursive_trinity.cmds &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/scaffolding_entries.sam &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/Trinity.fasta.gene_trans_map &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/Trinity.fasta &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/both.fa &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/inchworm.fa &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/jellyfish.kmers.25.asm.fa &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/partitioned_reads.files.list &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/recursive_trinity.cmds.completed &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/recursive_trinity.cmds &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/scaffolding_entries.sam &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/Trinity.fasta.gene_trans_map &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/Trinity.fasta &&
 
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/bundled_iworm_contigs.fasta &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/GraphFromIwormFasta.out &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100.?.bt2 &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100 &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100.rev.?.bt2 &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt.sorted &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt.sorted.wIwormNames &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_scaffolds.txt &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/readsToComponents.out &&
-		#pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/readsToComponents.out.sort &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/bundled_iworm_contigs.fasta &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/GraphFromIwormFasta.out &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100.?.bt2 &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100 &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/inchworm.fa.min100.rev.?.bt2 &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt.sorted &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_cluster_welds_graph.txt.sorted.wIwormNames &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/iworm_scaffolds.txt &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/readsToComponents.out &&
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/chrysalis/readsToComponents.out.sort &&
 
                 tar cf - ${BASE}/read_partitions | pigz -${LEVEL} -p ${THREAD} > ${BASE}/read_partitions.tar.gz &&
                 rm -rf ${BASE}/read_partitions &&
