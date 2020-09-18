@@ -111,8 +111,12 @@ then
 	pigz -${LEVEL} -p ${THREAD} ${BASE}/consensi.fa.classified &&
 	pigz -${LEVEL} -p ${THREAD} ${BASE}/consensi.fa &&
 	pigz -${LEVEL} -p ${THREAD} ${BASE}/consensi.fa.masked &&
-	pigz -${LEVEL} -p ${THREAD} ${BASE}/families-classified.stk &&
-	pigz -${LEVEL} -p ${THREAD} ${BASE}/families.stk &&
+	if [[ -f ${BASE}/families-classified.stk ]]; then
+    		pigz -${LEVEL} -p ${THREAD} ${BASE}/families-classified.stk
+	fi &&
+	if [[ -f ${BASE}/families.stk ]]; then
+		pigz -${LEVEL} -p ${THREAD} ${BASE}/families.stk
+	fi &&
 	for round in `find ${BASE} -type d -name round-?`
 	do
 		tar cf - ${round} | pigz -${LEVEL} -p ${THREAD} > ${round}.tar.gz &&
@@ -125,8 +129,12 @@ then
         pigz -d -p ${THREAD} ${BASE}/consensi.fa.classified.gz &&
         pigz -d -p ${THREAD} ${BASE}/consensi.fa.gz &&
         pigz -d -p ${THREAD} ${BASE}/consensi.fa.masked.gz &&
-        pigz -d -p ${THREAD} ${BASE}/families-classified.stk.gz &&
-        pigz -d -p ${THREAD} ${BASE}/families.stk.gz &&
+	if [[ -f ${BASE}/families-classified.stk.gz ]]; then
+        pigz -d -p ${THREAD} ${BASE}/families-classified.stk.gz
+	fi &&
+	if [[ -f ${BASE}/families.stk.gz ]]; then
+        pigz -d -p ${THREAD} ${BASE}/families.stk.gz
+	fi &&
         for round in `find ${BASE} -type f -name round-?.tar.gz`
         do
 		root=`basename ${round} .tar.gz` &&
