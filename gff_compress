@@ -33,7 +33,7 @@ find ${1} -type f -name "*.gff" -size +100M |
 while read file; 
 do
 output=`echo ${file} | sed 's/\.gff$/\.gff.gz/g'`; 
-cat ${file} | sort --parallel=${SLURM_NTASKS} -k1,1 -k2,2n | bgzip -f -c > ${output} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2) &&
+cat ${file} | sort --parallel=${SLURM_NTASKS} -k1,1 -k4,4n | bgzip -f -c > ${output} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2) &&
 tabix ${output} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2) &&
 rm ${file} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2)
 done
@@ -42,7 +42,7 @@ find ${1} -type f -name "*.gff3" -size +100M |
 while read file;
 do
 output=`echo ${file} | sed 's/\.gff3$/\.gff3.gz/g'`;
-cat ${file} | sort --parallel=${SLURM_NTASKS} -k1,1 -k2,2n | bgzip -f -c > ${output} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2) &&
+cat ${file} | sort --parallel=${SLURM_NTASKS} -k1,1 -k4,4n | bgzip -f -c > ${output} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2) &&
 tabix ${output} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2) &&
 rm ${file} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2)
 done
