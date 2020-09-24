@@ -34,6 +34,6 @@ while read file;
 do
 output=`echo ${file} | sed 's/\.bed$/\.bed.gz/g'`; 
 cat ${file} | sort --parallel=${SLURM_NTASKS} -k1,1 -k2,2n | bgzip -f -c > ${output} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2) &&
-tabix -p bed ${output} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2) &&
+tabix ${output} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2) &&
 rm ${file} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2)
 done
