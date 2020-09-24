@@ -25,14 +25,14 @@ if [[ $# -eq 0 ]]; then
 fi
 
 # load modules and environments
-module load bcftools/1.5-fasrc02
+module load GCC/7.3.0-2.30 OpenMPI/3.1.1 BCFtools/1.9
 
 # commands to run
 find ${1} -type f -name "*.vcf" -size +100M | 
 while read file; 
 do
 output=`echo ${file} | sed 's/\.vcf$/\.bcf/g'`; 
-cat ${file} | bcftools view -O b --threads ${SLURM_NTASKS} > ${output} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2) &&
+cat ${file} | bcftools sort -O b --threads ${SLURM_NTASKS} > ${output} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2) &&
 tabix -p vcf ${output} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2) &&
 rm ${file} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2)
 done
