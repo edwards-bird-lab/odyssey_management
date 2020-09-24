@@ -1,0 +1,47 @@
+#!/bin/bash
+#SBATCH -n 8                # Number of cores
+#SBATCH -N 1                # Ensure that all cores are on one machine
+#SBATCH --constraint=intel  # only use faster intel cores
+#SBATCH -t 3-00:00          # Runtime in D-HH:MM, minimum of 10 minutes
+#SBATCH -p shared  # Partition to submit to
+#SBATCH --mem=16000           # Memory pool for all cores (see also --mem-per-cpu)
+#SBATCH	-J gff_compress            # Job name for job
+#SBATCH -o gff_compress_%j.out  # File to which STDOUT will be written, %j inserts jobid
+#SBATCH -e gff_compress_%j.err  # File to which STDERR will be written, %j inserts jobid
+#SBATCH --mail-type=ALL        # Type of email notification- BEGIN,END,FAIL,ALL
+#SBATCH --mail-user= # Email to which notifications will be sent
+
+# arguments
+# ${1} = the folder location to compress GFF/GFF3
+# within this folder, all .gff/.gff3 files greater than 100 MB will be compressed
+# and the original files will be deleted
+
+if [[ $# -eq 0 ]]; then
+	echo "ERROR: No directory provided to search for GFF/GFF3 files"
+	echo "Try issuing the following commands with <target_directory> set to the directory where you want to compress GFF/GFF3 files:"
+	echo "$ directory=<target_directory>"
+	echo "$ sbatch -o \${directory}_gff_compress.out -e \${directory}_gff_compress.err gff_compress \${directory}"
+	exit 1
+fi
+
+# load modules and environments
+module load tabix/0.2.6-fasrc01
+
+# commands to run
+find ${1} -type f -name "*.gff" -size +100M | 
+while read file; 
+do
+output=`echo ${file} | sed 's/\.gff$/\.gff.gz/g'`; 
+cat ${file} | sort --parallel=${SLURM_NTASKS} -k1,1 -k2,2n | bgzip -f -c > ${output} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2) &&
+tabix -p gff ${output} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2) &&
+rm ${file} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2)
+done
+
+find ${1} -type f -name "*.gff3" -size +100M |
+while read file;
+do
+output=`echo ${file} | sed 's/\.gff3$/\.gff3.gz/g'`;
+cat ${file} | sort --parallel=${SLURM_NTASKS} -k1,1 -k2,2n | bgzip -f -c > ${output} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2) &&
+tabix -p gff ${output} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2) &&
+rm ${file} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2)
+done

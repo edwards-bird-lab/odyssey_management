@@ -1,0 +1,38 @@
+#!/bin/bash
+#SBATCH -n 8                # Number of cores
+#SBATCH -N 1                # Ensure that all cores are on one machine
+#SBATCH --constraint=intel  # only use faster intel cores
+#SBATCH -t 3-00:00          # Runtime in D-HH:MM, minimum of 10 minutes
+#SBATCH -p shared  # Partition to submit to
+#SBATCH --mem=16000           # Memory pool for all cores (see also --mem-per-cpu)
+#SBATCH	-J vcf_compress            # Job name for job
+#SBATCH -o vcf_compress_%j.out  # File to which STDOUT will be written, %j inserts jobid
+#SBATCH -e vcf_compress_%j.err  # File to which STDERR will be written, %j inserts jobid
+#SBATCH --mail-type=ALL        # Type of email notification- BEGIN,END,FAIL,ALL
+#SBATCH --mail-user= # Email to which notifications will be sent
+
+# arguments
+# ${1} = the folder location to compress VCF
+# within this folder, all .vcf files greater than 100 MB will be compressed
+# and the original files will be deleted
+
+if [[ $# -eq 0 ]]; then
+	echo "ERROR: No directory provided to search for VCF files"
+	echo "Try issuing the following commands with <target_directory> set to the directory where you want to compress VCF files:"
+	echo "$ directory=<target_directory>"
+	echo "$ sbatch -o \${directory}_vcf_compress.out -e \${directory}_vcf_compress.err vcf_compress \${directory}"
+	exit 1
+fi
+
+# load modules and environments
+module load bcftools/1.5-fasrc02
+
+# commands to run
+find ${1} -type f -name "*.vcf" -size +100M | 
+while read file; 
+do
+output=`echo ${file} | sed 's/\.vcf$/\.bcf/g'`; 
+cat ${file} | bcftools view -O b --threads ${SLURM_NTASKS} > ${output} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2) &&
+tabix -p vcf ${output} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2) &&
+rm ${file} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2)
+done
