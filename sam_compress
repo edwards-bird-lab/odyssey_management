@@ -33,5 +33,6 @@ while read file;
 do
 output=`echo ${file} | sed 's/\.sam$/\.bam/g'`; 
 cat ${file} | samtools view -@ ${SLURM_NTASKS} -b - > ${output} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2) &&
+samtools index -@ ${SLURM_NTASKS} ${output} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2) &&
 rm ${file} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2)
 done
