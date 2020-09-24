@@ -31,11 +31,11 @@ module load GCCcore/8.2.0 pigz/2.4
 find ${1} -type f -name "*.fastq" -size +100M | 
 while read file; 
 do 
-pigz -p ${SLURM_NTASKS} ${file} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2) 
+pigz -p ${SLURM_NTASKS} ${file} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2) 
 done
 
 find ${1} -type f -name "*.fq" -size +100M |
 while read file;
 do 
-pigz -p ${SLURM_NTASKS} ${file} 2> >(awk -v file=${file} '{ print file": " $1 }' >&2)
+pigz -p ${SLURM_NTASKS} ${file} 2> >(awk -v file=${file} '{ print file": " $0 }' >&2)
 done
