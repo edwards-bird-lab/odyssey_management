@@ -25,6 +25,7 @@ if [[ $# -eq 0 ]]; then
 fi
 
 # load modules and environments
+module purge
 module load samtools
 
 # commands to run

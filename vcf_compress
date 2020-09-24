@@ -25,6 +25,7 @@ if [[ $# -eq 0 ]]; then
 fi
 
 # load modules and environments
+module purge
 module load GCC/7.3.0-2.30 OpenMPI/3.1.1 BCFtools/1.9
 
 # commands to run
