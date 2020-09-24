@@ -13,7 +13,7 @@
 
 # arguments
 # ${1} = the folder location to compress VCF
-# within this folder, all .vcf files greater than 100 MB will be compressed
+# within this folder, all .vcf files greater than 100 MB will be compressed to compressed BCF format
 # and the original files will be deleted
 
 if [[ $# -eq 0 ]]; then

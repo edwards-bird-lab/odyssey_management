@@ -13,7 +13,7 @@
 
 # arguments
 # ${1} = the folder location to compress BED
-# within this folder, all .sam files greater than 100 MB will be compressed
+# within this folder, all .bed files greater than 100 MB will be compressed
 # and the original files will be deleted
 
 if [[ $# -eq 0 ]]; then
