@@ -1,0 +1,7 @@
+#/bin/bash
+
+# script to check the Slurm parameters for a given job
+# arguments:
+# ${1} = jobID of job to check
+
+scontrol show jobid=${1}
