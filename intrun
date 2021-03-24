@@ -7,4 +7,5 @@
 # $3 = time needed for interactive session
 # $4 = partition to run the session on
 
-srun --pty -p ${4} -n ${1} -t ${3} --mem ${2} /bin/bash
+#srun --pty -p ${4} -n ${1} -t ${3} --mem ${2} /bin/bash
+salloc -p ${4} -n ${1} -t ${3} --mem ${2}
