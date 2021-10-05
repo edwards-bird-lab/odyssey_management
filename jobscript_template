@@ -13,6 +13,16 @@ runscript="#!/bin/bash
 #SBATCH --mail-type=ALL        # Type of email notification- BEGIN,END,FAIL,ALL
 #SBATCH --mail-user=dcard@fas.harvard.edu # Email to which notifications will be sent
 
+# useful information
+# SLURM environmental variables
+# $SLURM_CPUS_ON_NODE = Number of cores/node
+# $SLURM_CPUS_PER_TASK = Number of cores per task
+# $SLURM_JOB_ID = Job ID
+# $SLURM_JOB_NAME = Job Name
+# $SLURM_NTASKS = Total number of cores for job
+# $SLURM_SUBMIT_DIR = Submit Directory
+# $SLURM_SUBMIT_HOST = Host submitted from
+
 # load modules and environments
 
 # commands to run
