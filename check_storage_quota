@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-# script to check Edwards lab data storage usage in holylfs and scratchlfs
+# script to check Edwards lab data storage usage in holylfs, scratchlfs, and holylabs.
 
 holy=`lfs quota -hg edwards_lab /n/holylfs04/LABS/`
 scratch=`lfs quota -hg edwards_lab /n/holyscratch01`
+extra=`lfs quota -hg edwards_lab /n/holylabs/LABS/`
 
-echo -e "Longterm Edwards Lab Storage:\n${holy}\n\nEdwards Lab Scratch Space:\n${scratch}"
+echo -e "Longterm Edwards Lab Storage:\n${holy}\n\nEdwards Lab Scratch Space:\n${scratch}\n\nEdwards Lab Extra Space (used by former lab members):\n${extra}"
